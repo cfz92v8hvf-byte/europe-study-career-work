@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "policy": "official-only",
+  "sources": [
+    {
+      "id": "euraxess-jobs",
+      "name": "EURAXESS Jobs, Career and Funding Opportunities",
+      "owner": "European Commission / EURAXESS",
+      "url": "https://euraxess.ec.europa.eu/jobs/search",
+      "categories": ["work", "research", "funding"],
+      "collection": "manual_adapter_required",
+      "enabled": false
+    },
+    {
+      "id": "erasmus-individuals",
+      "name": "Erasmus+ Opportunities for individuals",
+      "owner": "European Commission",
+      "url": "https://erasmus-plus.ec.europa.eu/opportunities/individuals",
+      "categories": ["study", "traineeship", "mobility"],
+      "collection": "manual_adapter_required",
+      "enabled": false
+    },
+    {
+      "id": "eures",
+      "name": "EURES European Job Network",
+      "owner": "European Commission / EURES",
+      "url": "https://eures.europa.eu/",
+      "categories": ["work"],
+      "collection": "manual_adapter_required",
+      "enabled": false
+    }
+  ]
+}
