@@ -1,0 +1,23 @@
+name: EURAXESS official source check
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '7 */6 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: europe-euraxess-source-check
+  cancel-in-progress: false
+
+jobs:
+  review-only:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: python scripts/euraxess_review.py --limit 3
