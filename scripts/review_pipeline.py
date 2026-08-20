@@ -11,7 +11,7 @@ from queue_store import connect, review_capacity
 from review_queue_audit import audit
 from translate_review_titles import translate_pending
 from translate_review_summaries import translate_pending_summaries
-from translation_corrections import correct_review_titles
+from translation_corrections import correct_review_summaries, correct_review_titles
 
 
 def run(*, max_collect: int = 3, collector=collect, translator=translate_pending, db=None) -> dict[str, int]:
@@ -28,6 +28,7 @@ def run(*, max_collect: int = 3, collector=collect, translator=translate_pending
         translated = translator(db, limit=min(max_collect, slots)) if slots else 0
         summaries_translated = translate_pending_summaries(db, limit=min(max_collect, slots)) if slots else 0
         corrected = correct_review_titles(db)
+        corrected += correct_review_summaries(db)
         audited = audit(db)
         result = {"review_slots": slots, "collected": added, "translated": translated, "summaries_translated": summaries_translated, "corrected": corrected, "audited": audited}
         record("review_pipeline", "ok", **{key: str(value) for key, value in result.items()})
