@@ -9,7 +9,8 @@
       "url": "https://euraxess.ec.europa.eu/jobs/search",
       "categories": ["work", "research", "funding"],
       "collection": "manual_adapter_required",
-      "enabled": false
+      "enabled": false,
+      "reason": "Official searchable database; dynamic-search adapter must be reviewed before activation."
     },
     {
       "id": "erasmus-individuals",
@@ -18,7 +19,8 @@
       "url": "https://erasmus-plus.ec.europa.eu/opportunities/individuals",
       "categories": ["study", "traineeship", "mobility"],
       "collection": "manual_adapter_required",
-      "enabled": false
+      "enabled": false,
+      "reason": "Official programme page; only time-bounded calls with a primary link may enter the queue."
     },
     {
       "id": "eures",
@@ -27,7 +29,8 @@
       "url": "https://eures.europa.eu/",
       "categories": ["work"],
       "collection": "manual_adapter_required",
-      "enabled": false
+      "enabled": false,
+      "reason": "Official job network; vacancy adapter and terms check are required before activation."
     }
   ]
 }
