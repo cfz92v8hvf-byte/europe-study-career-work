@@ -2,6 +2,7 @@
 """Generate a credential-free static queue dashboard."""
 from __future__ import annotations
 import html
+from datetime import datetime, timezone
 from pathlib import Path
 from queue_store import connect
 
@@ -16,6 +17,6 @@ def main() -> None:
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(f"""<!doctype html><meta charset=utf-8><title>Европа | Контроль</title>
 <style>body{{font:16px system-ui;max-width:720px;margin:48px auto;padding:0 20px;color:#10244a}}h1{{color:#1557a6}}.note{{padding:16px;background:#eef6ff;border-radius:12px}}</style>
-<h1>Европа | Учёба • Карьера • Работа</h1><p class=note>Панель очереди. Автопубликация отключена до отдельной проверки.</p><h2>Статусы</h2><ul>{cards}</ul>""", encoding="utf-8")
+<h1>Европа | Учёба • Карьера • Работа</h1><p class=note>Панель очереди. Автопубликация отключена до отдельной проверки.</p><h2>Статусы</h2><ul>{cards}</ul><p>Обновлено (UTC): {datetime.now(timezone.utc).isoformat()}</p>""", encoding="utf-8")
 
 if __name__ == "__main__": main()
