@@ -1,6 +1,6 @@
 {
   "project": "europe-study-career-work",
-  "mode": "disabled",
+  "mode": "review",
   "language": "ru",
   "max_candidates_per_run": 12,
   "max_review_candidates": 12,
