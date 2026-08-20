@@ -62,8 +62,8 @@ def _parse_translation(payload: object) -> str:
     return text
 
 
-def translate_en_title_to_russian(db, text: str, *, opener: Callable[..., object] = urlopen) -> str:
-    """Translate a short English title and record only successful daily usage."""
+def translate_en_text_to_russian(db, text: str, *, opener: Callable[..., object] = urlopen) -> str:
+    """Translate a short English source fragment and record only successful daily usage."""
     text = text.strip()
     source_bytes = text.encode("utf-8")
     if not text or len(source_bytes) > MAX_SOURCE_BYTES:
@@ -82,3 +82,7 @@ def translate_en_title_to_russian(db, text: str, *, opener: Callable[..., object
     translated = _parse_translation(payload)
     _record_usage(db, len(text))
     return translated
+
+
+def translate_en_title_to_russian(db, text: str, *, opener: Callable[..., object] = urlopen) -> str:
+    return translate_en_text_to_russian(db, text, opener=opener)
