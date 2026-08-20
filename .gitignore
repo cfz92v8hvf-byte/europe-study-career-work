@@ -1,0 +1,11 @@
+.env
+.env.*
+!.env.example
+__pycache__/
+*.py[cod]
+data/*.sqlite3
+data/*.db
+data/*.jsonl
+data/*.sqlite3
+!data/.gitkeep
+site/.cache/
