@@ -7,10 +7,8 @@ permissions:
   contents: read
 
 jobs:
-  verify-translation-credential:
+  verify-review-translator:
     runs-on: ubuntu-latest
-    env:
-      GOOGLE_TRANSLATE_API_KEY: ${{ secrets.GOOGLE_TRANSLATE_API_KEY }}
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
