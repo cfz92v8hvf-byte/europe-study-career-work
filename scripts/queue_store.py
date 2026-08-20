@@ -5,6 +5,7 @@ import hashlib
 import sqlite3
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from candidate_validation import validate_candidate
 
 ROOT = Path(__file__).resolve().parents[1]
 DB_PATH = ROOT / "data" / "queue.sqlite3"
@@ -37,6 +38,8 @@ def fingerprint(source_url: str) -> str:
 
 def add_candidate(db: sqlite3.Connection, *, source_id: str, source_url: str, original_title: str,
                   title_ru: str | None = None, deadline_at: str | None = None) -> bool:
+    validate_candidate(source_id=source_id, source_url=source_url,
+                       original_title=original_title, deadline_at=deadline_at)
     now = datetime.now(timezone.utc).isoformat()
     try:
         db.execute("""INSERT INTO candidates
