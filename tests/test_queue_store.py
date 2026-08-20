@@ -4,7 +4,7 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from queue_store import add_candidate, connect, transition
+from queue_store import add_candidate, connect, review_capacity, transition
 from operations_log import record
 
 
@@ -38,6 +38,22 @@ class QueueStoreTests(unittest.TestCase):
                     source_url="https://euraxess.ec.europa.eu/jobs/offer/expired",
                     original_title="Expired research role",
                     deadline_at="2020-01-01T00:00:00+00:00",
+                )
+
+    def test_review_capacity_prevents_unbounded_accumulation(self):
+        with tempfile.TemporaryDirectory() as directory:
+            db = connect(Path(directory) / "queue.sqlite3")
+            for index in range(review_capacity()):
+                self.assertTrue(add_candidate(
+                    db, source_id="euraxess-jobs",
+                    source_url=f"https://euraxess.ec.europa.eu/jobs/offer/{index}",
+                    original_title=f"Research role number {index}",
+                ))
+            with self.assertRaisesRegex(RuntimeError, "Review queue is full"):
+                add_candidate(
+                    db, source_id="euraxess-jobs",
+                    source_url="https://euraxess.ec.europa.eu/jobs/offer/overflow",
+                    original_title="Overflow research role",
                 )
 
 
