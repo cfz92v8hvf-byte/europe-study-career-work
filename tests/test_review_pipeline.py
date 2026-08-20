@@ -33,13 +33,13 @@ class ReviewPipelineTests(unittest.TestCase):
 
         with patch.object(review_pipeline, "record"):
             result = review_pipeline.run(collector=collector, translator=translator, db=self.db)
-        self.assertEqual(result, {"review_slots": 12, "collected": 1, "translated": 1})
+        self.assertEqual(result, {"review_slots": 12, "collected": 1, "translated": 1, "audited": 1})
         self.assertEqual(self.db.execute("SELECT status FROM candidates").fetchone()[0], "review")
 
     def test_stops_collection_when_review_queue_is_full(self):
         for number in range(12):
-            add_candidate(self.db, source_id="euraxess-jobs", source_url=f"https://euraxess.ec.europa.eu/jobs/{number}", original_title=f"Research assistant position {number}")
+            add_candidate(self.db, source_id="euraxess-jobs", source_url=f"https://euraxess.ec.europa.eu/jobs/{number}", original_title=f"Research assistant position {number}", title_ru=f"Должность научного сотрудника {number}")
 
         with patch.object(review_pipeline, "record"):
             result = review_pipeline.run(collector=lambda *_args, **_kwargs: self.fail("must not collect"), translator=lambda *_args, **_kwargs: self.fail("must not translate"), db=self.db)
-        self.assertEqual(result, {"review_slots": 0, "collected": 0, "translated": 0})
+        self.assertEqual(result, {"review_slots": 0, "collected": 0, "translated": 0, "audited": 12})
