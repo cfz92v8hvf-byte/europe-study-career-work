@@ -1,31 +1,66 @@
 """Independent, fail-closed queue for the Europe channel."""
+from __future__ import annotations
+
 import hashlib
 import sqlite3
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-DB_PATH = Path(__file__).resolve().parents[1] / "data" / "queue.sqlite3"
+ROOT = Path(__file__).resolve().parents[1]
+DB_PATH = ROOT / "data" / "queue.sqlite3"
 ALLOWED = {"review", "approved", "scheduled", "published", "expired", "rejected"}
 
-def connect(path=DB_PATH):
+
+def connect(path: Path = DB_PATH) -> sqlite3.Connection:
     path.parent.mkdir(parents=True, exist_ok=True)
     db = sqlite3.connect(path)
-    db.execute("CREATE TABLE IF NOT EXISTS candidates (id INTEGER PRIMARY KEY, fingerprint TEXT UNIQUE NOT NULL, source_url TEXT UNIQUE NOT NULL, status TEXT NOT NULL, discovered_at TEXT NOT NULL)")
+    db.row_factory = sqlite3.Row
+    db.execute("""CREATE TABLE IF NOT EXISTS candidates (
+        id INTEGER PRIMARY KEY,
+        fingerprint TEXT NOT NULL UNIQUE,
+        source_id TEXT NOT NULL,
+        source_url TEXT NOT NULL UNIQUE,
+        original_title TEXT NOT NULL,
+        title_ru TEXT,
+        deadline_at TEXT,
+        discovered_at TEXT NOT NULL,
+        status TEXT NOT NULL CHECK(status IN ('review','approved','scheduled','published','expired','rejected')),
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )""")
     return db
 
-def add_candidate(db, source_url):
+
+def fingerprint(source_url: str) -> str:
+    return hashlib.sha256(source_url.strip().encode("utf-8")).hexdigest()
+
+
+def add_candidate(db: sqlite3.Connection, *, source_id: str, source_url: str, original_title: str,
+                  title_ru: str | None = None, deadline_at: str | None = None) -> bool:
+    now = datetime.now(timezone.utc).isoformat()
     try:
-        db.execute("INSERT INTO candidates VALUES (NULL, ?, ?, 'review', ?)", (hashlib.sha256(source_url.encode()).hexdigest(), source_url, datetime.now(timezone.utc).isoformat()))
-        db.commit(); return True
+        db.execute("""INSERT INTO candidates
+            (fingerprint, source_id, source_url, original_title, title_ru, deadline_at, discovered_at, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, 'review')""",
+            (fingerprint(source_url), source_id, source_url, original_title.strip(), title_ru, deadline_at, now))
+        db.commit()
+        return True
     except sqlite3.IntegrityError:
         return False
 
-def expire_stale(db, hours):
-    cutoff = (datetime.now(timezone.utc) - timedelta(hours=hours)).isoformat()
-    result = db.execute("UPDATE candidates SET status='expired' WHERE status IN ('review','approved') AND discovered_at < ?", (cutoff,))
-    db.commit(); return result.rowcount
 
-def transition(db, candidate_id, status):
-    if status not in ALLOWED or status == 'published':
-        raise ValueError('Publishing is deliberately unavailable in this local queue layer')
-    db.execute("UPDATE candidates SET status=? WHERE id=?", (status, candidate_id)); db.commit()
+def expire_stale(db: sqlite3.Connection, hours: int) -> int:
+    threshold = (datetime.now(timezone.utc) - timedelta(hours=hours)).isoformat()
+    result = db.execute("""UPDATE candidates SET status='expired', updated_at=CURRENT_TIMESTAMP
+        WHERE status IN ('review', 'approved') AND discovered_at < ?""", (threshold,))
+    db.commit()
+    return result.rowcount
+
+
+def transition(db: sqlite3.Connection, candidate_id: int, to_status: str) -> None:
+    if to_status not in ALLOWED or to_status == "published":
+        raise ValueError("Publishing is deliberately unavailable in this local queue layer")
+    result = db.execute("UPDATE candidates SET status=?, updated_at=CURRENT_TIMESTAMP WHERE id=?", (to_status, candidate_id))
+    if result.rowcount != 1:
+        raise KeyError(candidate_id)
+    db.commit()
