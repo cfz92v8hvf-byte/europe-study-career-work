@@ -8,6 +8,7 @@ from dashboard import main as build_dashboard
 from euraxess_review import collect
 from operations_log import record
 from queue_store import connect, review_capacity
+from review_queue_audit import audit
 from translate_review_titles import translate_pending
 
 
@@ -23,7 +24,8 @@ def run(*, max_collect: int = 3, collector=collect, translator=translate_pending
         collected_rows = collector(min(max_collect, slots), enqueue=True) if slots else []
         added = sum(1 for row in collected_rows if row.get("added_to_review") is True)
         translated = translator(db, limit=min(max_collect, slots)) if slots else 0
-        result = {"review_slots": slots, "collected": added, "translated": translated}
+        audited = audit(db)
+        result = {"review_slots": slots, "collected": added, "translated": translated, "audited": audited}
         record("review_pipeline", "ok", **{key: str(value) for key, value in result.items()})
         return result
     finally:
