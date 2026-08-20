@@ -12,7 +12,7 @@ class QueueStoreTests(unittest.TestCase):
     def test_deduplicates_and_fails_closed_on_publish(self):
         with tempfile.TemporaryDirectory() as directory:
             db = connect(Path(directory) / "queue.sqlite3")
-            kwargs = dict(source_id="euraxess-jobs", source_url="https://example.eu/offer/42", original_title="Research role")
+            kwargs = dict(source_id="euraxess-jobs", source_url="https://euraxess.ec.europa.eu/jobs/offer/42", original_title="Research role")
             self.assertTrue(add_candidate(db, **kwargs))
             self.assertFalse(add_candidate(db, **kwargs))
             with self.assertRaises(ValueError):
@@ -21,6 +21,12 @@ class QueueStoreTests(unittest.TestCase):
     def test_log_rejects_credential_named_fields(self):
         with self.assertRaises(ValueError):
             record("test", "ok", api_token="must-not-log")
+
+    def test_rejects_non_official_candidate_url(self):
+        with tempfile.TemporaryDirectory() as directory:
+            db = connect(Path(directory) / "queue.sqlite3")
+            with self.assertRaises(ValueError):
+                add_candidate(db, source_id="euraxess-jobs", source_url="https://example.org/offer/42", original_title="Research role")
 
 
 if __name__ == "__main__":
