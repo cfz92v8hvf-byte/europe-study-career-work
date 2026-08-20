@@ -28,6 +28,18 @@ class QueueStoreTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 add_candidate(db, source_id="euraxess-jobs", source_url="https://example.org/offer/42", original_title="Research role")
 
+    def test_rejects_expired_deadline(self):
+        with tempfile.TemporaryDirectory() as directory:
+            db = connect(Path(directory) / "queue.sqlite3")
+            with self.assertRaises(ValueError):
+                add_candidate(
+                    db,
+                    source_id="euraxess-jobs",
+                    source_url="https://euraxess.ec.europa.eu/jobs/offer/expired",
+                    original_title="Expired research role",
+                    deadline_at="2020-01-01T00:00:00+00:00",
+                )
+
 
 if __name__ == "__main__":
     unittest.main()
