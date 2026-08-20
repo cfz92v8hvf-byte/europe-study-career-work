@@ -8,12 +8,13 @@ import euraxess_review
 
 
 class EuraxessReviewTests(unittest.TestCase):
-    @patch("euraxess_review.fetch_offer_title", side_effect=["Official role one", "Official role two"])
+    @patch("euraxess_review.fetch_offer_details", side_effect=[("Official role one", "An official source description that is long enough for review."), ("Official role two", None)])
     @patch("euraxess_review.discover_offer_urls", return_value=["https://euraxess.ec.europa.eu/jobs/1", "https://euraxess.ec.europa.eu/jobs/2"])
     @patch("euraxess_review.fetch_search_html", return_value="page")
-    def test_default_collection_does_not_write_queue(self, _html, _urls, _titles):
+    def test_default_collection_does_not_write_queue(self, _html, _urls, _details):
         rows = euraxess_review.collect(2)
         self.assertEqual([row["added_to_review"] for row in rows], [None, None])
+        self.assertEqual([row["has_original_summary"] for row in rows], [True, False])
 
     def test_limit_is_bounded(self):
         with self.assertRaises(ValueError):
@@ -21,7 +22,7 @@ class EuraxessReviewTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             euraxess_review.collect(21)
 
-    @patch("euraxess_review.fetch_offer_title", side_effect=RuntimeError("rate limited"))
+    @patch("euraxess_review.fetch_offer_details", side_effect=RuntimeError("rate limited"))
     @patch("euraxess_review.discover_offer_urls", return_value=["https://euraxess.ec.europa.eu/jobs/1"])
     @patch("euraxess_review.fetch_search_html", return_value="page")
     def test_temporary_source_error_does_not_stop_collection(self, _html, _urls, _title):
