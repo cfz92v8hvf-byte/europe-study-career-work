@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: europe-euraxess-source-check
+  group: europe-channel-state
   cancel-in-progress: false
 
 jobs:
@@ -27,4 +27,5 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add docs/index.html docs/source-health.json
           git diff --cached --quiet || git commit -m 'Refresh official source health'
+          git pull --rebase origin main
           git push
