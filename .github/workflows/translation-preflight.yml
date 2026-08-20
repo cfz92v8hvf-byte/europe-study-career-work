@@ -1,0 +1,19 @@
+name: Translation readiness preflight
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-translation-credential:
+    runs-on: ubuntu-latest
+    env:
+      TRANSLATION_API_KEY: ${{ secrets.TRANSLATION_API_KEY }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: python scripts/translation_preflight.py
