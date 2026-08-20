@@ -25,3 +25,8 @@ class ReviewQueueAuditTests(unittest.TestCase):
         add_candidate(self.db, source_id="euraxess-jobs", source_url="https://euraxess.ec.europa.eu/jobs/1", original_title="Research assistant position")
         with self.assertRaisesRegex(RuntimeError, "untranslated"):
             audit(self.db)
+
+    def test_blocks_known_academic_title_mistranslation(self):
+        add_candidate(self.db, source_id="euraxess-jobs", source_url="https://euraxess.ec.europa.eu/jobs/2", original_title="PhD Candidate in Materials", title_ru="Кандидат наук в области материалов")
+        with self.assertRaisesRegex(RuntimeError, "PhD Candidate"):
+            audit(self.db)
