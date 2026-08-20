@@ -1,0 +1,2 @@
+n\n⏳ Срок: {deadline_label.strip()}" if deadline_label and deadline_label.strip() else ""
+    return f"<b>{title}</b>\n\n{summary}{deadline}\n\n🔗 <a href=\"{source_url}\">{source_name.strip()}</a>"
