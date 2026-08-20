@@ -29,5 +29,32 @@ def fetch_search_html() -> str:
         return response.read().decode("utf-8", errors="replace")
 
 
+def extract_offer_title(html: str) -> str:
+    """Return an offer title from a fetched official offer page without translating it."""
+    patterns = (
+        r'<meta[^>]+property=["\']og:title["\'][^>]+content=["\']([^"\']+)["\']',
+        r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:title["\']',
+        r"<title[^>]*>(.*?)</title>",
+    )
+    for pattern in patterns:
+        match = re.search(pattern, html, flags=re.I | re.S)
+        if match:
+            title = re.sub(r"\s+", " ", unescape(match.group(1))).strip()
+            if len(title) >= 8:
+                return title
+    raise RuntimeError("EURAXESS offer page has no usable title")
+
+
+def fetch_offer_title(url: str) -> str:
+    parsed = urlparse(url)
+    if parsed.scheme != "https" or parsed.hostname != HOST or not re.fullmatch(r"/jobs/\d+", parsed.path):
+        raise ValueError("Only direct EURAXESS offer URLs may be fetched")
+    request = Request(url, headers={"User-Agent": "EuropeStudyCareerReviewBot/1.0"})
+    with urlopen(request, timeout=20) as response:
+        if response.status != 200:
+            raise RuntimeError("EURAXESS offer page did not return HTTP 200")
+        return extract_offer_title(response.read().decode("utf-8", errors="replace"))
+
+
 if __name__ == "__main__":
     print("\n".join(discover_offer_urls(fetch_search_html())[:20]))
