@@ -45,7 +45,33 @@ def extract_offer_title(html: str) -> str:
     raise RuntimeError("EURAXESS offer page has no usable title")
 
 
+def extract_offer_summary(html: str) -> str | None:
+    """Extract only an official page description suitable for later human review."""
+    patterns = (
+        r'<meta[^>]+property=["\']og:description["\'][^>]+content=["\']([^"\']+)["\']',
+        r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:description["\']',
+        r'<meta[^>]+name=["\']description["\'][^>]+content=["\']([^"\']+)["\']',
+        r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+name=["\']description["\']',
+    )
+    for pattern in patterns:
+        match = re.search(pattern, html, flags=re.I | re.S)
+        if match:
+            text = re.sub(r"\s+", " ", unescape(match.group(1))).strip()
+            raw = text.encode("utf-8")
+            if len(raw) <= 450:
+                short = text
+            else:
+                short = raw[:450].decode("utf-8", errors="ignore").rsplit(" ", 1)[0].strip()
+            if len(short) >= 40:
+                return short
+    return None
+
+
 def fetch_offer_title(url: str) -> str:
+    return fetch_offer_details(url)[0]
+
+
+def fetch_offer_details(url: str) -> tuple[str, str | None]:
     parsed = urlparse(url)
     if parsed.scheme != "https" or parsed.hostname != HOST or not re.fullmatch(r"/jobs/\d+", parsed.path):
         raise ValueError("Only direct EURAXESS offer URLs may be fetched")
@@ -53,7 +79,8 @@ def fetch_offer_title(url: str) -> str:
     with urlopen(request, timeout=20) as response:
         if response.status != 200:
             raise RuntimeError("EURAXESS offer page did not return HTTP 200")
-        return extract_offer_title(response.read().decode("utf-8", errors="replace"))
+        html = response.read().decode("utf-8", errors="replace")
+        return extract_offer_title(html), extract_offer_summary(html)
 
 
 if __name__ == "__main__":
