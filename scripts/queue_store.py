@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import sqlite3
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -10,6 +11,14 @@ from candidate_validation import validate_candidate
 ROOT = Path(__file__).resolve().parents[1]
 DB_PATH = ROOT / "data" / "queue.sqlite3"
 ALLOWED = {"review", "approved", "scheduled", "published", "expired", "rejected"}
+
+
+def review_capacity() -> int:
+    settings = json.loads((ROOT / "config" / "settings.json").read_text(encoding="utf-8"))
+    capacity = settings.get("max_review_candidates")
+    if not isinstance(capacity, int) or capacity < 1:
+        raise ValueError("max_review_candidates must be a positive integer")
+    return capacity
 
 
 def connect(path: Path = DB_PATH) -> sqlite3.Connection:
@@ -40,6 +49,11 @@ def add_candidate(db: sqlite3.Connection, *, source_id: str, source_url: str, or
                   title_ru: str | None = None, deadline_at: str | None = None) -> bool:
     validate_candidate(source_id=source_id, source_url=source_url,
                        original_title=original_title, deadline_at=deadline_at)
+    if db.execute("SELECT 1 FROM candidates WHERE source_url=?", (source_url,)).fetchone():
+        return False
+    pending = db.execute("SELECT COUNT(*) FROM candidates WHERE status='review'").fetchone()[0]
+    if pending >= review_capacity():
+        raise RuntimeError("Review queue is full; no additional candidates may be collected")
     now = datetime.now(timezone.utc).isoformat()
     try:
         db.execute("""INSERT INTO candidates
