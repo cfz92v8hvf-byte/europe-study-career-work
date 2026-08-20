@@ -8,9 +8,9 @@
       "owner": "European Commission / EURAXESS",
       "url": "https://euraxess.ec.europa.eu/jobs/search",
       "categories": ["work", "research", "funding"],
-      "collection": "manual_adapter_required",
-      "enabled": false,
-      "reason": "Official searchable database; dynamic-search adapter must be reviewed before activation."
+      "collection": "scheduled_review_adapter",
+      "enabled": true,
+      "reason": "Direct-offer adapter is tested; collection remains review-only and cannot publish."
     },
     {
       "id": "erasmus-individuals",
