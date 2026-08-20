@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import html
 import json
+import sqlite3
 from datetime import date
 from typing import Callable
 from urllib.parse import urlencode
@@ -29,9 +30,13 @@ def _ensure_usage_table(db) -> None:
 
 
 def used_today(db, today: date | None = None) -> int:
-    _ensure_usage_table(db)
     day = (today or date.today()).isoformat()
-    row = db.execute("SELECT characters_used FROM translation_usage WHERE usage_day=?", (day,)).fetchone()
+    try:
+        row = db.execute("SELECT characters_used FROM translation_usage WHERE usage_day=?", (day,)).fetchone()
+    except sqlite3.OperationalError as error:
+        if "no such table" not in str(error).lower():
+            raise
+        return 0
     return int(row[0]) if row else 0
 
 
@@ -63,6 +68,7 @@ def translate_en_title_to_russian(db, text: str, *, opener: Callable[..., object
     source_bytes = text.encode("utf-8")
     if not text or len(source_bytes) > MAX_SOURCE_BYTES:
         raise ValueError("MyMemory accepts only non-empty titles up to 500 UTF-8 bytes")
+    _ensure_usage_table(db)
     usage = used_today(db)
     if usage + len(text) > SAFE_DAILY_CAP:
         raise RuntimeError("Translation blocked: safe daily free limit would be exceeded")
