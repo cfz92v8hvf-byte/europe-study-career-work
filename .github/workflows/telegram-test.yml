@@ -1,0 +1,27 @@
+name: Telegram delivery test
+
+on:
+  workflow_dispatch:
+    inputs:
+      send_test:
+        description: 'Type YES to send exactly one marked test post'
+        required: true
+        default: 'NO'
+
+permissions:
+  contents: read
+
+jobs:
+  test-delivery:
+    if: inputs.send_test == 'YES'
+    runs-on: ubuntu-latest
+    env:
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHANNEL: ${{ secrets.TELEGRAM_CHANNEL }}
+      ENABLE_TELEGRAM_TEST: 'YES'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python scripts/telegram_publish.py --send-test
