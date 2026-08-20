@@ -15,7 +15,7 @@ def _registry() -> dict[str, dict]:
 
 
 def validate_candidate(*, source_id: str, source_url: str, original_title: str,
-                       deadline_at: str | None = None) -> None:
+                       title_ru: str | None = None, deadline_at: str | None = None) -> None:
     """Reject an item unless its source and deadline are verifiably admissible."""
     source = _registry().get(source_id)
     if not source:
@@ -26,6 +26,12 @@ def validate_candidate(*, source_id: str, source_url: str, original_title: str,
         raise ValueError("Candidate URL must use the registered official HTTPS host")
     if len(original_title.strip()) < 8:
         raise ValueError("Original title is too short to identify an opportunity")
+    if title_ru is not None:
+        translated = title_ru.strip()
+        if len(translated) < 8 or not any("а" <= char.lower() <= "я" for char in translated):
+            raise ValueError("Russian translation must contain a meaningful Cyrillic title")
+        if translated.casefold() == original_title.strip().casefold():
+            raise ValueError("Russian translation must not duplicate the original title")
     if deadline_at:
         try:
             deadline = datetime.fromisoformat(deadline_at.replace("Z", "+00:00"))
