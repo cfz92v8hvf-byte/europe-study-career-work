@@ -10,7 +10,7 @@ jobs:
   verify-translation-credential:
     runs-on: ubuntu-latest
     env:
-      TRANSLATION_API_KEY: ${{ secrets.TRANSLATION_API_KEY }}
+      GOOGLE_TRANSLATE_API_KEY: ${{ secrets.GOOGLE_TRANSLATE_API_KEY }}
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
