@@ -5,6 +5,9 @@ on:
     - cron: '17 * * * *'
 permissions:
   contents: write
+concurrency:
+  group: europe-channel-cloud-check
+  cancel-in-progress: false
 jobs:
   check:
     runs-on: ubuntu-latest
