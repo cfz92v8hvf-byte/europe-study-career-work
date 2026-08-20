@@ -18,7 +18,7 @@ def main() -> None:
     settings = load("config/settings.json")
     registry = load("config/sources.json")
     assert settings["project"] == "europe-study-career-work"
-    assert settings["mode"] == "disabled", "Publishing must start disabled"
+    assert settings["mode"] in {"disabled", "review"}, "Automatic publication is not allowed"
     assert registry["policy"] == "official-only"
     ids: set[str] = set()
     for source in registry["sources"]:
@@ -26,9 +26,12 @@ def main() -> None:
         ids.add(source["id"])
         parsed = urlparse(source["url"])
         assert parsed.scheme == "https" and parsed.netloc
-        assert source["enabled"] is False, "No source may collect before its adapter is reviewed"
-        assert source["collection"] == "manual_adapter_required"
-    print(f"OK: {len(ids)} official sources are registered; automation remains disabled.")
+        if source["enabled"]:
+            assert source["id"] == "euraxess-jobs", "Only the tested EURAXESS review adapter may collect"
+            assert source["collection"] == "scheduled_review_adapter"
+        else:
+            assert source["collection"] == "manual_adapter_required"
+    print(f"OK: {len(ids)} official sources are registered; publication is blocked and review automation is controlled.")
 
 
 if __name__ == "__main__":
