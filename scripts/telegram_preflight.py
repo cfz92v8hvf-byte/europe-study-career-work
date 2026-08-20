@@ -18,7 +18,13 @@ def api(token: str, method: str, payload: dict | None = None) -> dict:
     try:
         with urlopen(request, timeout=20) as response:
             body = json.loads(response.read().decode("utf-8"))
-    except (HTTPError, URLError) as error:
+    except HTTPError as error:
+        if method == "getChatMember" and error.code in {400, 403}:
+            raise RuntimeError(
+                "Preflight blocked: bot is not available as a channel administrator; no post was attempted"
+            ) from error
+        raise RuntimeError("Telegram preflight failed; no post was attempted") from error
+    except URLError as error:
         raise RuntimeError("Telegram preflight failed; no post was attempted") from error
     if not body.get("ok"):
         raise RuntimeError("Telegram preflight was rejected; no post was attempted")
