@@ -1,1 +1,2 @@
 {"at": "2026-08-20T13:26:04.188267+00:00", "details": {"collected": "1", "review_slots": "12", "translated": "1"}, "event": "review_pipeline", "result": "ok"}
+{"at": "2026-08-20T13:33:40.837299+00:00", "details": {"audited": "3", "collected": "2", "review_slots": "11", "summaries_translated": "2", "translated": "2"}, "event": "review_pipeline", "result": "ok"}
