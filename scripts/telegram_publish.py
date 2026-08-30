@@ -22,7 +22,7 @@ def test_message() -> str:
 
 
 def send_message(token: str, channel: str, message: str) -> int:
-    payload = json.dumps({"chat_id": channel, "text": message, "disable_web_page_preview": True}).encode("utf-8")
+    payload = json.dumps({"chat_id": channel, "text": message, "parse_mode": "HTML", "disable_web_page_preview": False}).encode("utf-8")
     request = Request(
         f"https://api.telegram.org/bot{token}/sendMessage",
         data=payload,
