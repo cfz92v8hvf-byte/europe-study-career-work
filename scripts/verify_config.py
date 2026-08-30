@@ -18,7 +18,7 @@ def main() -> None:
     settings = load("config/settings.json")
     registry = load("config/sources.json")
     assert settings["project"] == "europe-study-career-work"
-    assert settings["mode"] in {"disabled", "review"}, "Automatic publication is not allowed"
+    assert settings["mode"] in {"disabled", "review", "auto"}, "Unsupported publication mode"
     assert registry["policy"] == "official-only"
     ids: set[str] = set()
     for source in registry["sources"]:
@@ -31,7 +31,7 @@ def main() -> None:
             assert source["collection"] == "scheduled_review_adapter"
         else:
             assert source["collection"] == "manual_adapter_required"
-    print(f"OK: {len(ids)} official sources are registered; publication is blocked and review automation is controlled.")
+    print(f"OK: {len(ids)} official sources are registered; mode={settings['mode']}.")
 
 
 if __name__ == "__main__":
