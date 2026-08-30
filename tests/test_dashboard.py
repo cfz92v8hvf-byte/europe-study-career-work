@@ -24,7 +24,7 @@ class DashboardTests(unittest.TestCase):
                 dashboard.main()
             page = output.read_text(encoding="utf-8")
             self.assertIn("MyMemory: 42 из 4000 символов", page)
-            self.assertIn("публикация недоступна", page)
+            self.assertIn("Автопубликация включена", page)
 
     def test_displays_zero_when_read_only_queue_has_no_usage_table(self):
         with tempfile.TemporaryDirectory() as temp:
