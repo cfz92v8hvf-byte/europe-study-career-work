@@ -43,3 +43,9 @@ class ReviewPipelineTests(unittest.TestCase):
         with patch.object(review_pipeline, "record"):
             result = review_pipeline.run(collector=lambda *_args, **_kwargs: self.fail("must not collect"), translator=lambda *_args, **_kwargs: self.fail("must not translate"), db=self.db)
         self.assertEqual(result, {"review_slots": 0, "collected": 0, "translated": 0, "summaries_translated": 0, "corrected": 12, "audited": 12})
+
+    def test_corrects_capitalized_phd_candidate_translation(self):
+        from translation_corrections import correct_review_titles
+        add_candidate(self.db, source_id="euraxess-jobs", source_url="https://euraxess.ec.europa.eu/jobs/456", original_title="PhD Candidate in Materials", title_ru="Кандидат наук в области материалов")
+        self.assertEqual(correct_review_titles(self.db), 1)
+        self.assertIn("аспирант", self.db.execute("SELECT title_ru FROM candidates").fetchone()[0].casefold())
