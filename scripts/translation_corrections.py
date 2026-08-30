@@ -26,10 +26,11 @@ def correct_review_titles(db) -> int:
 
 def correct_review_summaries(db) -> int:
     changed = 0
-    for row in db.execute("SELECT id, summary_ru FROM candidates WHERE status='review' AND summary_ru IS NOT NULL"):
-        text = row["summary_ru"]
-        if any(marker in text.casefold() for marker in (" the ", " hereby ", " under the ")):
-            db.execute("UPDATE candidates SET summary_ru=?, updated_at=CURRENT_TIMESTAMP WHERE id=?", ("Официальное объявление о возможности. Подробные условия и требования указаны в первоисточнике по ссылке.", row["id"]))
+    fallback = "Официальное объявление о возможности. Подробные условия и требования указаны в первоисточнике по ссылке."
+    for row in db.execute("SELECT id, summary_ru FROM candidates WHERE status='review'"):
+        text = row["summary_ru"] or ""
+        if not text.strip() or any(marker in text.casefold() for marker in (" the ", " hereby ", " under the ")):
+            db.execute("UPDATE candidates SET summary_ru=?, updated_at=CURRENT_TIMESTAMP WHERE id=?", (fallback, row["id"]))
             changed += 1
     db.commit()
     return changed
