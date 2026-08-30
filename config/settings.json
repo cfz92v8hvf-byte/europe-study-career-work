@@ -1,11 +1,15 @@
 {
   "project": "europe-study-career-work",
-  "mode": "review",
+  "mode": "auto",
   "language": "ru",
   "max_candidates_per_run": 12,
   "max_review_candidates": 12,
   "max_posts_per_day": 3,
   "minimum_hours_between_posts": 4,
   "pending_expiry_hours": 72,
-  "sources": []
+  "sources": [],
+  "bootstrap_published_urls": [
+    "https://euraxess.ec.europa.eu/jobs/461017",
+    "https://euraxess.ec.europa.eu/jobs/461016"
+  ]
 }
