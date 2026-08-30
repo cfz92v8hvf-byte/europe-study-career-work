@@ -41,9 +41,10 @@ def connect(path: Path = DB_PATH) -> sqlite3.Connection:
         updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     )""")
     existing = {row[1] for row in db.execute("PRAGMA table_info(candidates)")}
-    for name in ("original_summary", "summary_ru"):
+    for name in ("original_summary", "summary_ru", "published_at", "telegram_message_id"):
         if name not in existing:
-            db.execute(f"ALTER TABLE candidates ADD COLUMN {name} TEXT")
+            column_type = "INTEGER" if name == "telegram_message_id" else "TEXT"
+            db.execute(f"ALTER TABLE candidates ADD COLUMN {name} {column_type}")
     db.commit()
     return db
 
@@ -86,8 +87,19 @@ def expire_stale(db: sqlite3.Connection, hours: int) -> int:
 
 def transition(db: sqlite3.Connection, candidate_id: int, to_status: str) -> None:
     if to_status not in ALLOWED or to_status == "published":
-        raise ValueError("Publishing is deliberately unavailable in this local queue layer")
+        raise ValueError("Use mark_published only after Telegram confirms a message id")
     result = db.execute("UPDATE candidates SET status=?, updated_at=CURRENT_TIMESTAMP WHERE id=?", (to_status, candidate_id))
+    if result.rowcount != 1:
+        raise KeyError(candidate_id)
+    db.commit()
+
+
+def mark_published(db: sqlite3.Connection, candidate_id: int, *, message_id: int | None = None) -> None:
+    """Persist a publication receipt only after an external Telegram confirmation."""
+    result = db.execute("""UPDATE candidates
+        SET status='published', published_at=?, telegram_message_id=?, updated_at=CURRENT_TIMESTAMP
+        WHERE id=? AND status IN ('review', 'approved', 'scheduled')""",
+        (datetime.now(timezone.utc).isoformat(), message_id, candidate_id))
     if result.rowcount != 1:
         raise KeyError(candidate_id)
     db.commit()
