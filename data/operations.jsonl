@@ -2,3 +2,5 @@
 {"at": "2026-08-20T13:33:40.837299+00:00", "details": {"audited": "3", "collected": "2", "review_slots": "11", "summaries_translated": "2", "translated": "2"}, "event": "review_pipeline", "result": "ok"}
 {"at": "2026-08-30T16:13:04.133140+00:00", "details": {"audited": "6", "collected": "3", "corrected": "5", "review_slots": "9", "summaries_translated": "3", "translated": "3"}, "event": "review_pipeline", "result": "ok"}
 {"at": "2026-08-30T16:13:04.216385+00:00", "details": {"bootstrapped": "2", "published": "0"}, "event": "auto_publish", "result": "ok"}
+{"at": "2026-08-30T16:47:10.853629+00:00", "details": {"audited": "4", "collected": "0", "corrected": "0", "review_slots": "8", "summaries_translated": "0", "translated": "0"}, "event": "review_pipeline", "result": "ok"}
+{"at": "2026-08-30T16:47:10.921914+00:00", "details": {"bootstrapped": "0", "published": "0"}, "event": "auto_publish", "result": "ok"}
