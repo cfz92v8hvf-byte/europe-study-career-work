@@ -274,3 +274,5 @@
 {"at": "2026-10-14T21:47:58.364791+00:00", "details": {"bootstrapped": "0", "message_id": "124", "published": "1"}, "event": "auto_publish", "result": "ok"}
 {"at": "2026-10-15T04:51:35.116738+00:00", "details": {"audited": "11", "collected": "1", "corrected": "0", "review_slots": "2", "summaries_translated": "1", "translated": "1"}, "event": "review_pipeline", "result": "ok"}
 {"at": "2026-10-15T04:51:36.673734+00:00", "details": {"bootstrapped": "0", "message_id": "125", "published": "1"}, "event": "auto_publish", "result": "ok"}
+{"at": "2026-10-15T17:09:36.383952+00:00", "details": {"audited": "12", "collected": "2", "corrected": "0", "review_slots": "2", "summaries_translated": "2", "translated": "2"}, "event": "review_pipeline", "result": "ok"}
+{"at": "2026-10-15T17:09:37.438964+00:00", "details": {"bootstrapped": "0", "message_id": "126", "published": "1"}, "event": "auto_publish", "result": "ok"}
